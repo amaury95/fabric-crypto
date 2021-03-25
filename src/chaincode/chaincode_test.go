@@ -170,7 +170,8 @@ var _ = Describe("Signature", func() {
 			Expect(err).To(BeNil())
 
 			// create and send transaction
-			tx, err := wallet1.CreateTx(wallet2.PublicKey, 50)
+			var sendAmount uint64 = 50
+			tx, err := wallet1.CreateTx(wallet2.PublicKey, sendAmount)
 			Expect(err).To(BeNil())
 
 			input2 := &schema.RequestSend{Tx: tx}
@@ -179,6 +180,50 @@ var _ = Describe("Signature", func() {
 			Expect(err).To(BeNil())
 
 			expectcc.ResponseOk(signatureChaincode.Invoke(`send`, data2))
+		})
+
+		It("returns the amount of first wallet updated", func() {
+			wallet, err := FromSeed(AddressSeed1)
+			Expect(err).To(BeNil())
+
+			input := &schema.RequestBalance{
+				Address: wallet.PublicKeyBytes(),
+			}
+
+			data, err := encoder.Marshal(input)
+			Expect(err).To(BeNil())
+
+			queryResponse := signatureChaincode.Query(`balance`, data)
+
+			var response schema.ResponseBalance
+			err = encoder.Unmarshal(queryResponse.Payload, &response)
+			Expect(err).To(BeNil())
+
+			var expBalance uint64 = 50
+			Expect(response.Balance.Amount).To(Equal(expBalance))
+			Expect(response.Balance.Txid).NotTo(BeNil())
+		})
+
+		It("returns the amount of second wallet updated", func() {
+			wallet, err := FromSeed(AddressSeed2)
+			Expect(err).To(BeNil())
+
+			input := &schema.RequestBalance{
+				Address: wallet.PublicKeyBytes(),
+			}
+
+			data, err := encoder.Marshal(input)
+			Expect(err).To(BeNil())
+
+			queryResponse := signatureChaincode.Query(`balance`, data)
+
+			var response schema.ResponseBalance
+			err = encoder.Unmarshal(queryResponse.Payload, &response)
+			Expect(err).To(BeNil())
+
+			var expBalance uint64 = 150
+			Expect(response.Balance.Amount).To(Equal(expBalance))
+			Expect(response.Balance.Txid).NotTo(BeNil())
 		})
 	})
 })
