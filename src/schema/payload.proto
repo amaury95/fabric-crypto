@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option go_package = "signature.example.com/src/schema";
+package schema;
+
+import "state.proto";
+
+// MODELS
+
+message Transaction {
+    bytes sender = 1;
+    bytes receiver = 2;
+    uint64 amount = 3;
+    bytes signature = 4;
+}
+
+// REGISTER
+
+message requestRegister {
+    bytes address = 1;
+}
+
+message responseRegister {
+    Balance balance = 1;
+}
+
+// BALANCE
+
+message requestBalance {
+    bytes address = 1;
+}
+
+message responseBalance {
+    Balance balance = 1;
+}
+
+// SEND
+
+message requestSend {
+    Transaction tx = 1;
+}
+
+message responseSend {
+    Balance balance = 1;
+}
