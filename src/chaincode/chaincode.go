@@ -139,6 +139,11 @@ func (s *SignatureChaincode) send(stub shim.ChaincodeStubInterface, input *schem
 		return nil, err
 	}
 
+	// check valid amount
+	if sender.Balance.Amount < input.Tx.Amount {
+		return nil, errors.New("insuficient amount to send")
+	}
+
 	// check transaction signature
 	txid, err := s.verifySignature(input.Tx, sender.Balance.Txid)
 	if err != nil {
